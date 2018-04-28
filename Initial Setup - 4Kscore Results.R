@@ -5,11 +5,14 @@ here::here()
 #  importing the data
 data = list()
 data[["meta.auc"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 4) %>%
-  mutate(cohort = case_when(
-    cohort == "Overall (fixed effects estimat" ~ "Overall (fixed effects estimate)",
-    cohort == "Overall (random effects estima" ~ "Overall (random effects estimate)",
-    TRUE ~ cohort
-  ))
+  mutate(
+    cohort = case_when(
+      cohort == "Overall (fixed effects estimat" ~ "Overall (fixed effects estimate)",
+      cohort == "Overall (random effects estima" ~ "Overall (random effects estimate)",
+      TRUE ~ cohort
+    ),
+    cohort.est = paste(cohort, es, sep = "; ")
+  )
 data[["cohort.n"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 1) 
 data[["table.one"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 2)
 data[["table.one.cohort"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 3) 

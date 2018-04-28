@@ -91,7 +91,7 @@ server <- function(input, output) {
       filter(model == "Base Model") %>%
       filter(psa.range == input$psa.range & age.range == input$age.range & 
                dre.set == input$dre.set & contemporary == input$contemp.set) %>%
-      ggplot(aes(x = factor(cohort, rev(unique(.$cohort))),
+      ggplot(aes(x = factor(cohort.est, rev(unique(.$cohort.est))),
                  y=esn, ymin=lbn, ymax=ubn)) +
       geom_pointrange() + 
       geom_hline(yintercept=0.5, lty=2) +  # add a dotted line at x=1 after flip
@@ -112,7 +112,7 @@ server <- function(input, output) {
       filter(model == "Kallikrein Model") %>%
       filter(psa.range == input$psa.range & age.range == input$age.range & 
                dre.set == input$dre.set & contemporary == input$contemp.set) %>%
-      ggplot(aes(x = factor(cohort, rev(unique(.$cohort))),
+      ggplot(aes(x = factor(cohort.est, rev(unique(.$cohort.est))),
                  y=esn, ymin=lbn, ymax=ubn)) +
       geom_pointrange() + 
       geom_hline(yintercept=0.5, lty=2) +  # add a dotted line at x=1 after flip
@@ -133,7 +133,7 @@ server <- function(input, output) {
       filter(model == "Difference between Base and Ka") %>%
       filter(psa.range == input$psa.range & age.range == input$age.range & 
                dre.set == input$dre.set & contemporary == input$contemp.set) %>%
-      ggplot(aes(x = factor(cohort, rev(unique(.$cohort))),
+      ggplot(aes(x = factor(cohort.est, rev(unique(.$cohort.est))),
                  y=esn, ymin=lbn, ymax=ubn)) +
       geom_pointrange() + 
       geom_hline(yintercept=0, lty=2) +  # add a dotted line at x=1 after flip
