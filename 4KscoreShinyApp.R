@@ -97,7 +97,7 @@ server <- function(input, output) {
                  dre.set == input$dre.set & contemporary == input$contemp.set)
     )
     
-    ifelse(N>0, " ", "Too few data points for meta analysis.")
+    ifelse(N>0, " ", "Too few data points for meta analysis. Cohorts with fewer than 20 high-grade cancers or fewer than 20 patients without high-grade cancer were excluded.")
   })
   
   # base model meta

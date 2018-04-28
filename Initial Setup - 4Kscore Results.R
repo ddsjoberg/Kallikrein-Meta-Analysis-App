@@ -11,7 +11,7 @@ data[["meta.auc"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 4) %
       cohort == "Overall (random effects estima" ~ "Overall (random effects estimate)",
       TRUE ~ cohort
     ),
-    cohort.est = paste(cohort, es, sep = "; ")
+    cohort.est = paste(cohort, es, sep = ": ")
   )
 data[["cohort.n"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 1) 
 data[["table.one"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 2)
