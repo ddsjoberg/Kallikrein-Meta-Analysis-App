@@ -25,6 +25,8 @@ ui <- fluidPage(
   selectInput("contemp.set", h3("Contemporary Cohort"),
               choices = contemp.set.list, selected = contemp.set.list[[1]]),
   
+  textOutput("N"),
+
   h3("Cohort Descriptions"),
   tableOutput("cohort.n"),
 
@@ -63,7 +65,8 @@ server <- function(input, output) {
              'Percent Included' = pctinclude.disp)
   },
   na = "",
-  colnames = T)
+  colnames = T,
+  digits = 0)
   
   # tableone output
   output$table.one <- renderTable({
@@ -84,6 +87,18 @@ server <- function(input, output) {
   },
   na = "",
   colnames = F)  
+  
+  # this will display a message if there are no results 
+  output$N = renderText({ 
+    N = nrow(
+      data$meta.auc %>%
+        filter(model == "Base Model") %>%
+        filter(psa.range == input$psa.range & age.range == input$age.range & 
+                 dre.set == input$dre.set & contemporary == input$contemp.set)
+    )
+    
+    ifelse(N>0, " ", "Too few data points for meta analysis.")
+  })
   
   # base model meta
   output$basemodel.meta = renderPlot({
