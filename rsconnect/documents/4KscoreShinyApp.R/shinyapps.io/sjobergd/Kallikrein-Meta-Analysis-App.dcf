@@ -1,0 +1,13 @@
+name: Kallikrein-Meta-Analysis-App
+title: Kallikrein-Meta-Analysis-App
+username:
+account: sjobergd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 332742
+bundleId: 1344347
+url: https://sjobergd.shinyapps.io/Kallikrein-Meta-Analysis-App/
+when: 1524881753.92884
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: HTML Full Data Final.xlsx|Initial Setup - 4Kscore Results.R

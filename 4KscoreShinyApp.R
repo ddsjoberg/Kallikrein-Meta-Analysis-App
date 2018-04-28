@@ -1,59 +1,13 @@
 # this shiny app shows the results from the meta analysis 
 # in any PSA, Age, DRE, contemporary cohort combination.
+
+here::here()
+
 library(shiny)
 library(dplyr)
 library(ggplot2)
 
-names = c("cohort.n",
-          "table.one",
-          "table.one.cohort",
-          "meta.auc")
-
-tempfile = c(tempfile(fileext = ".csv"),
-             tempfile(fileext = ".csv"),
-             tempfile(fileext = ".csv"),
-             tempfile(fileext = ".csv"))
-data.url = c("https://docs.google.com/spreadsheets/d/e/2PACX-1vSdISUp196c6nDgqytME57eCnorvOTfllBXPm2f5-xWZQotgYVhJun_tswo8mQHI61ytCYZtleKpMRP/pub?gid=0&single=true&output=csv",
-             "https://docs.google.com/spreadsheets/d/e/2PACX-1vTfsNqWkNseFQQJWtvDdCXrigC2rNyZO7iNtvY6sz1ufYn-gI4itFR2IKxGD_DnmdDjfTwychsrG7i2/pub?gid=0&single=true&output=csv",
-             "https://docs.google.com/spreadsheets/d/e/2PACX-1vQBSQVi4hDKbtkSnpzmtjxWVX4MIuPhmE5BWzDitB6IfNXk8gtLifSbXAAfpp5dEhm-vJQdiMdfEz8M/pub?gid=1144284133&single=true&output=csv",
-             "https://docs.google.com/spreadsheets/d/e/2PACX-1vT4cMArJZVRFuTjacsdDGqCRjKa9Pi-FYktWaOO11oNrK5oBSS3oJRAIJV0qczgFrFlKbF0LFVdoHsx/pub?gid=0&single=true&output=csv")
-
-# downloading temp csv files of data from Google Sheets (published as CSV files)
-purrr::map2(data.url, tempfile, ~ download.file(.x, .y))
-
-# loading downloaded files
-data = purrr::map(tempfile, readr::read_csv)
-names(data) = names
-
-# creating a list of posstible outcomes and naming them after their values
-filter.names = c("psa.range",
-                 "age.range",
-                 "dre.set",
-                 "contemp.set")
-
-filter.values = purrr::map(filter.names, ~ data$cohort.n %>% 
-             select_(.x) %>%
-             distinct)
-
-filter.values %>%
-  purrr::map(~ .x[[1]] %>%
-               purrr::map(., ~ as.character(list(.x))))
-
-psa.range.list = filter.values[[1]][[1]] %>%
-  purrr::map(., ~ as.character(list(.x)))
-names(psa.range.list) = filter.values[[1]][[1]]
-
-age.range.list = filter.values[[2]][[1]] %>%
-  purrr::map(., ~ as.character(list(.x)))
-names(age.range.list) = filter.values[[2]][[1]]
-
-dre.set.list = filter.values[[3]][[1]] %>%
-  purrr::map(., ~ as.character(list(.x)))
-names(dre.set.list) = filter.values[[3]][[1]]
-
-contemp.set.list = list()
-contemp.set.list$'All Cohorts' = 0
-contemp.set.list$'Contemporary Cohorts Only' = 1
+load(file = "data.RData")
 
 # Define UI for app 
 ui <- fluidPage(
@@ -141,9 +95,15 @@ server <- function(input, output) {
                  y=esn, ymin=lbn, ymax=ubn)) +
       geom_pointrange() + 
       geom_hline(yintercept=0.5, lty=2) +  # add a dotted line at x=1 after flip
+      geom_vline(xintercept = 0.5) +
       coord_flip() +  # flip coordinates (puts labels on y axis)
       xlab(" ") + ylab("AUC (95% CI)") +
-      theme_bw()  # use a white background  
+      theme_bw() +  # use a white background  
+      theme(axis.text=element_text(size=12),
+            panel.grid.major.y = element_blank(),
+            panel.grid.minor.y = element_blank(),
+            panel.border = element_blank(),
+            axis.ticks.y = element_blank())
     })
     
   # klk model meta
@@ -156,10 +116,16 @@ server <- function(input, output) {
                  y=esn, ymin=lbn, ymax=ubn)) +
       geom_pointrange() + 
       geom_hline(yintercept=0.5, lty=2) +  # add a dotted line at x=1 after flip
+      geom_vline(xintercept = 0.5) +
       coord_flip() +  # flip coordinates (puts labels on y axis)
       xlab(" ") + ylab("AUC (95% CI)") +
-      theme_bw()  # use a white background  
-  })
+      theme_bw() +  # use a white background  
+      theme(axis.text=element_text(size=12),
+            panel.grid.major.y = element_blank(),
+            panel.grid.minor.y = element_blank(),
+            panel.border = element_blank(),
+            axis.ticks.y = element_blank())
+    })
   
   # klk improvement over base meta
   output$klkdelta.meta = renderPlot({
@@ -171,10 +137,16 @@ server <- function(input, output) {
                  y=esn, ymin=lbn, ymax=ubn)) +
       geom_pointrange() + 
       geom_hline(yintercept=0, lty=2) +  # add a dotted line at x=1 after flip
+      geom_vline(xintercept = 0.5) +
       coord_flip() +  # flip coordinates (puts labels on y axis)
-      xlab(" ") + ylab("AUC (95% CI)") +
-      theme_bw()  # use a white background  
-  })
+      xlab(" ") + ylab("Delta AUC (95% CI)") +
+      theme_bw() +  # use a white background  
+      theme(axis.text=element_text(size=12),
+            panel.grid.major.y = element_blank(),
+            panel.grid.minor.y = element_blank(),
+            panel.border = element_blank(),
+            axis.ticks.y = element_blank()) 
+    })
 }
 
 
