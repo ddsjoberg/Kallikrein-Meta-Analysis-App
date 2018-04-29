@@ -71,7 +71,7 @@ data[["table.one"]] = data[["table.one"]] %>%
   
 data[["table.one.cohort"]] = data[["table.one.cohort"]] %>%
   left_join(psa.ranges) %>% left_join(age.ranges) %>% left_join(dre.set) %>% left_join(contemp.set) %>% left_join(cohort.full)  %>%
-  group_by(cohort) %>%
+  group_by(cohort, psa.range, age.range, dre.set, contemp.set) %>%
   mutate(cohort.disp = ifelse(1:n() == 1, cohort, NA)) %>%
   ungroup
 
