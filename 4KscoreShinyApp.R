@@ -6,16 +6,19 @@ here::here()
 library(shiny)
 library(dplyr)
 library(ggplot2)
+library(plotly)
+library(stringr)
 
 load(file = "data.RData")
 
-# Define UI for app 
+# Define UI for app ----
 ui <- fluidPage(
-  # App title ----
+  # App title 
   # titlePanel("Value of a statistical model based on four kallikrein markers in blood, commercially available as 4Kscore, in all reasonable prostate biopsy subgroups"),
   # h3("Supplemental Material"),
   # p("Words, blah, blah, select any PSA range you'd like, blah, blah"),
   
+  # ui: select functions ----
   selectInput("psa.range", h3("PSA Range"),
               choices = psa.range.list, selected = psa.range.list[[1]]),
   selectInput("age.range", h3("Age Range"),
@@ -25,10 +28,21 @@ ui <- fluidPage(
   selectInput("contemp.set", h3("Contemporary Cohort"),
               choices = contemp.set.list, selected = contemp.set.list[[1]]),
   
+  # ui: printing ui results ----
+  # printing note if no analyses were performed in combination selected
   textOutput("N"),
 
   h3("Cohort Descriptions"),
   tableOutput("cohort.n"),
+
+  h3("Base Model AUC Meta-analysis"),
+  plotlyOutput("plotly.base.meta"),
+  
+  h3("Kallikrein Model AUC Meta-analysis"),
+  plotlyOutput("plotly.klk.meta"),
+  
+  h3("Improvement of Kallikrein Model over Base Meta-analysis"),
+  plotlyOutput("plotly.delta.meta"),
 
   h3("Base Model AUC Meta-analysis"),
   plotOutput("basemodel.meta"),
@@ -48,10 +62,10 @@ ui <- fluidPage(
 
 
 
-# Define server logic 
+# server: Define server logic ----
 server <- function(input, output) {
   
-  # cohort descriptions
+  # server: cohort descriptions ----
   output$cohort.n <- renderTable({
     data$cohort.n %>%
       filter(psa.range == input$psa.range & age.range == input$age.range & 
@@ -68,7 +82,7 @@ server <- function(input, output) {
   colnames = T,
   digits = 0)
   
-  # tableone output
+  # server: tableone output ----
   output$table.one <- renderTable({
     data$table.one %>%
       filter(psa.range == input$psa.range & age.range == input$age.range & 
@@ -78,7 +92,7 @@ server <- function(input, output) {
   na = "",
   colnames = F)
   
-  # tableone output by cohort
+  # server: tableone output by cohort ----
   output$table.one.cohort <- renderTable({
     data$table.one.cohort %>%
       filter(psa.range == input$psa.range & age.range == input$age.range & 
@@ -88,6 +102,7 @@ server <- function(input, output) {
   na = "",
   colnames = F)  
   
+  # server: note for no analyses ----
   # this will display a message if there are no results 
   output$N = renderText({ 
     N = nrow(
@@ -100,7 +115,7 @@ server <- function(input, output) {
     ifelse(N>0, " ", "Too few data points for meta analysis. Cohorts with fewer than 20 high-grade cancers or fewer than 20 patients without high-grade cancer were excluded.")
   })
   
-  # base model meta
+  # server: base model meta ----
   output$basemodel.meta = renderPlot({
     data$meta.auc %>%
       filter(model == "Base Model") %>%
@@ -121,7 +136,7 @@ server <- function(input, output) {
             axis.ticks.y = element_blank())
     })
     
-  # klk model meta
+  # server: klk model meta ----
   output$klkmodel.meta = renderPlot({
     data$meta.auc %>%
       filter(model == "Kallikrein Model") %>%
@@ -142,7 +157,7 @@ server <- function(input, output) {
             axis.ticks.y = element_blank())
     })
   
-  # klk improvement over base meta
+  # server: klk improvement over base meta ----
   output$klkdelta.meta = renderPlot({
     data$meta.auc %>%
       filter(model == "Difference between Base and Ka") %>%
@@ -162,6 +177,72 @@ server <- function(input, output) {
             panel.border = element_blank(),
             axis.ticks.y = element_blank()) 
     })
+  
+  # server: PLOTLY base model meta ----
+  output$plotly.base.meta <- renderPlotly({
+    d = data$meta.auc %>%
+      filter(model == "Base Model") %>%
+      filter(psa.range == input$psa.range & age.range == input$age.range & 
+               dre.set == input$dre.set & contemporary == input$contemp.set) %>%
+      mutate(es = str_replace(string = es, pattern = fixed(" ("), replacement = fixed(" (95% CI "))) %>%
+      ggplot(aes(y = factor(cohort, rev(unique(.$cohort))),
+                 x=esn, xmin=lbn, xmax=ubn, text = es)) +
+      geom_vline(xintercept = 0.5, linetype=2, alpha=0.75) +
+      geom_errorbarh(color="black", height = 0) +
+      geom_point() +
+      ylab(" ") + xlab("AUC (95% CI)") +
+      theme_bw() +  # use a white background  
+      theme(axis.text=element_text(size=12),
+            panel.grid.major.y = element_blank(),
+            panel.grid.minor.y = element_blank(),
+            panel.border = element_blank(),
+            axis.ticks.y = element_blank()) 
+    ggplotly(d, tooltip="text") 
+  })
+
+  # server: PLOTLY klk model meta ----
+  output$plotly.klk.meta <- renderPlotly({
+    d = data$meta.auc %>%
+      filter(model == "Kallikrein Model") %>%
+      filter(psa.range == input$psa.range & age.range == input$age.range & 
+               dre.set == input$dre.set & contemporary == input$contemp.set) %>%
+      mutate(es = str_replace(string = es, pattern = fixed(" ("), replacement = fixed(" (95% CI "))) %>%
+      ggplot(aes(y = factor(cohort, rev(unique(.$cohort))),
+                 x=esn, xmin=lbn, xmax=ubn, text = es)) +
+      geom_vline(xintercept = 0.5, linetype=2, alpha=0.75) +
+      geom_errorbarh(color="black", height = 0) +
+      geom_point() +
+      ylab(" ") + xlab("AUC (95% CI)") +
+      theme_bw() +  # use a white background  
+      theme(axis.text=element_text(size=12),
+            panel.grid.major.y = element_blank(),
+            panel.grid.minor.y = element_blank(),
+            panel.border = element_blank(),
+            axis.ticks.y = element_blank()) 
+    ggplotly(d, tooltip="text") 
+  })
+
+  # server: PLOTLY klk improvement over base meta ----
+  output$plotly.delta.meta <- renderPlotly({
+    d = data$meta.auc %>%
+      filter(model == "Difference between Base and Ka") %>%
+      filter(psa.range == input$psa.range & age.range == input$age.range & 
+               dre.set == input$dre.set & contemporary == input$contemp.set) %>%
+      mutate(es = str_replace(string = es, pattern = fixed(" ("), replacement = fixed(" (95% CI "))) %>%
+      ggplot(aes(y = factor(cohort, rev(unique(.$cohort))),
+                 x=esn, xmin=lbn, xmax=ubn, text = es)) +
+      geom_vline(xintercept = 0, linetype=2, alpha=0.75) +
+      geom_errorbarh(color="black", height = 0) +
+      geom_point() +
+      ylab(" ") + xlab("Delta AUC (95% CI)") +
+      theme_bw() +  # use a white background  
+      theme(axis.text=element_text(size=12),
+            panel.grid.major.y = element_blank(),
+            panel.grid.minor.y = element_blank(),
+            panel.border = element_blank(),
+            axis.ticks.y = element_blank()) 
+    ggplotly(d, tooltip="text") 
+  })
 }
 
 
