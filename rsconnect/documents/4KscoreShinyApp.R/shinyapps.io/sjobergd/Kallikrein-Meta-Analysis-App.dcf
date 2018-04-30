@@ -5,9 +5,9 @@ account: sjobergd
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 332742
-bundleId: 1344374
+bundleId: 1346400
 url: https://sjobergd.shinyapps.io/Kallikrein-Meta-Analysis-App/
-when: 1524884210.16857
+when: 1525050063.33379
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: HTML Full Data Final.xlsx|Initial Setup - 4Kscore Results.R
+ignoredFiles: 4Kscore html with embedded shiny app.Rmd|4Kscore_html_with_embedded_shiny_app.html|HTML Full Data Final.xlsx|Initial Setup - 4Kscore Results.R
