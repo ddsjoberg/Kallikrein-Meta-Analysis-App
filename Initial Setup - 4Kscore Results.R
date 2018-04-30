@@ -2,22 +2,29 @@
 library(dplyr)
 here::here()
 
-#  importing the data
+#  importing data ----
+# data stored in four sheet of an excel file.
+# will be stored in one list caleed data.  each item i nthe list is a sheet from the excel file.
 data = list()
+# importing the results from the meta analysis
 data[["meta.auc"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 4) %>%
   mutate(
+    # correcting the cohort descriptions that were cut off
     cohort = case_when(
       cohort == "Overall (fixed effects estimat" ~ "Overall (fixed effects estimate)",
       cohort == "Overall (random effects estima" ~ "Overall (random effects estimate)",
       TRUE ~ cohort
     ),
+    # combining the cohort name of the AUC estimate for a label on the figure
     cohort.est = paste(cohort, es, sep = ": ")
   )
+# importing the remaining data.
 data[["cohort.n"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 1) 
 data[["table.one"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 2)
 data[["table.one.cohort"]] = readxl::read_xlsx("HTML Full Data Final.xlsx", sheet = 3) 
 
-
+# creating variables fof rshiny selects ----
+# creating the four variables that will be printed in the drop down menus in the dropdown shiny menus
 psa.ranges = 
   data$cohort.n %>%
   select(psalo, psahi) %>%
@@ -61,7 +68,7 @@ cohort.full =
     cohort == "Veterans Affairs" ~ "Southern US Veterans Affairs Cohort"
   ))  
 
-
+# adding variable select vars to tibbles ----
 # adding in the formatted filters to each set
 data[["cohort.n"]] = data[["cohort.n"]] %>% 
   left_join(psa.ranges) %>% left_join(age.ranges) %>% left_join(dre.set) %>% left_join(contemp.set) %>% left_join(cohort.full)  
@@ -78,8 +85,7 @@ data[["table.one.cohort"]] = data[["table.one.cohort"]] %>%
 data[["meta.auc"]] = data[["meta.auc"]] %>%
   left_join(psa.ranges) %>% left_join(age.ranges) %>% left_join(dre.set) %>% left_join(contemp.set) %>% left_join(cohort.full) 
 
-
-
+# creating named lists for shiny selects ----
 psa.range.list = psa.ranges$psa.range %>%
   purrr::map(., ~ as.character(list(.x)))
 names(psa.range.list) = psa.ranges$psa.range
@@ -97,6 +103,7 @@ contemp.set.list$'All Cohorts' = 0
 contemp.set.list$'Contemporary Cohorts Only' = 1
 
 
-
+# saving image ----
+# the image is uplaoded with the shiny app
 save.image("data.RData")  
 
